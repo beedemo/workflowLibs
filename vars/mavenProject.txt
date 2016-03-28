@@ -1,0 +1,7 @@
+<h3>Configuration</h3>
+<dl>
+	<dt>email</dt>
+	<dd>email address for messages</dd>
+	<dt>repo</dt>
+	<dd>org/user and repo name <pre>sa-demo/todo-api</pre></dd>
+</dl>
