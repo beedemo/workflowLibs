@@ -5,3 +5,12 @@
 	<dt>repo</dt>
 	<dd>org/user and repo name <pre>sa-demo/todo-api</pre></dd>
 </dl>
+
+<h3>Example Job</h3>
+<pre>
+	mavenProject {
+		repo = 'todo-api'
+		email = 'kmadel@cloudbees.com'
+		jdk = 8
+	}
+</pre>
