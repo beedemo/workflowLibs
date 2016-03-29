@@ -29,7 +29,7 @@ def call(body) {
     node('docker-cloud') {
         checkout scm
         docker.image("kmadel/${config.repo}-build").inside(){
-            sh "mvn clean install"
+            sh "mvn -Dmaven.repo.local=/maven-repo clean install"
         }
         mail to: "${config.email}", subject: "${config.repo} plugin build", body: "The build for ${config.repo} was successful"
     }
