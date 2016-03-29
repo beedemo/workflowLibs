@@ -5,6 +5,7 @@ def call(branches, apiUrl, credentialsId, org, repo) {
 
     // The standard 'for (String s: stringsToEcho)' syntax also doesn't work, so we
     // need to use old school 'for (int i = 0...)' style for loops.
+    echo "updating protected status on ${org}/${repo}"
     for (int i = 0; i < branches.size(); i++) {
         // Get the actual string here.
         def s = branches.get(i)
@@ -15,6 +16,7 @@ def call(branches, apiUrl, credentialsId, org, repo) {
         def stepName = "echoing ${s}"
     
         stepsForParallel[stepName] = {
+            echo "setting protected status for ${s} branch"
             node('docker-cloud') {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                   sh """curl -u ${env.USERNAME}:${env.PASSWORD} '${apiUrl}/repos/${org}/${repo}/branches/${s}' \

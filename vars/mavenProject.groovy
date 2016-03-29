@@ -10,11 +10,14 @@ def call(body) {
     echo "building with JDK ${jdkVersion}"
     def rebuildBuildImage = config.rebuildBuildImage ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
+    stage 'update protected branches'
     if(config.protectedBranches!=null && !config.protectedBranches.empty){
         //set up GitHub protected branches for specified branches
         def apiUrl = 'https://github.beescloud.com/api/v3'
         def credentialsId = '3ebff2f8-1013-42ff-a1e4-6d74e99f4ca1'
         githubProtectBranch(config.protectedBranches, apiUrl, credentialsId, config.org, config.repo)
+    } else {
+        echo 'no branches set to protect'
     }
     stage 'set up build image'
     node('docker-cloud') {
