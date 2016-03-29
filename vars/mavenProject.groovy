@@ -7,6 +7,8 @@ def call(body) {
     body()
     //default to jdk 8
     def jdkVersion = config.jdk ?: 8
+    echo "building with JDK ${jdkVersion}"
+    def rebuildBuildImage = config.rebuildBuildImage ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
     stage 'set up build image'
     node('docker-cloud') {
@@ -14,6 +16,9 @@ def call(body) {
         try {
             buildImage = docker.image("kmadel/${config.repo}-build").pull()
             echo "buildImage already built for ${config.repo}"
+            if(rebuildBuildImage){
+                error "rebuild of buildImage ${config.repo}-build requested"
+            }
         } catch (e) {
             echo "buildImage needs to be built and pushed for ${config.repo}"
             def workspaceDir = pwd()
