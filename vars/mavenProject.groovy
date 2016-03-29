@@ -5,18 +5,21 @@ def call(body) {
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = config
     body()
+    //default to jdk 8
+    def jdkVersion = config.jdk ?: 8
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
     stage 'set up build image'
     node('docker-cloud') {
         def buildImage
         try {
             buildImage = docker.image("kmadel/${config.repo}-build").pull()
+            echo "buildImage already built for ${config.repo}"
         } catch (e) {
             echo "buildImage needs to be built and pushed for ${config.repo}"
             def workspaceDir = pwd()
             checkout scm
             //docker.image('maven:3.3.3-jdk-8').run("-w ${workspaceDir} ")
-            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:3.3.3-jdk-${config.jdk} mvn -Dmaven.repo.local=/maven-repo clean install"
+            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:3.3.3-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo clean install"
             sh "docker commit maven-build kmadel/${config.repo}-build"
             sh "docker rm -f maven-build"
             withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
