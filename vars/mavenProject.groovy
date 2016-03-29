@@ -28,9 +28,9 @@ def call(body) {
     // now build, based on the configuration provided
     node('docker-cloud') {
         checkout scm
-        docker.image('kmadel/${config.repo}-build').inside(){
+        docker.image("kmadel/${config.repo}-build").inside(){
             sh "mvn clean install"
         }
-        mail to: "${config.email}", subject: "${config.repo} plugin build", body: "Email body"
+        mail to: "${config.email}", subject: "${config.repo} plugin build", body: "The build for ${config.repo} was successful"
     }
 }
