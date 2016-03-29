@@ -16,7 +16,7 @@ def call(body) {
             def workspaceDir = pwd()
             checkout scm
             //docker.image('maven:3.3.3-jdk-8').run("-w ${workspaceDir} ")
-            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:3.3.3-jdk-8:3.3.3-jdk-${config.jdk} mvn -Dmaven.repo.local=/maven-repo clean install"
+            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:3.3.3-jdk-${config.jdk} mvn -Dmaven.repo.local=/maven-repo clean install"
             sh "docker commit maven-build kmadel/${config.repo}-build"
             sh "docker rm -f maven-build"
             withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
