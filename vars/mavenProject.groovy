@@ -17,6 +17,7 @@ def call(body) {
             buildImage = docker.image("kmadel/${config.repo}-build").pull()
             echo "buildImage already built for ${config.repo}"
             if(rebuildBuildImage){
+                echo "rebuild of buildImage ${config.repo}-build requested"
                 error "rebuild of buildImage ${config.repo}-build requested"
             }
         } catch (e) {
