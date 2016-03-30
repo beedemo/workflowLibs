@@ -7,6 +7,7 @@ def call(body) {
     body()
     //default to jdk 8
     def jdkVersion = config.jdk ?: 8
+    def mavenVersion = config.maven ?: '3.3.3'
     echo "building with JDK ${jdkVersion}"
     def rebuildBuildImage = config.rebuildBuildImage ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
@@ -33,10 +34,11 @@ def call(body) {
             echo "buildImage needs to be built and pushed for ${config.repo}"
             def workspaceDir = pwd()
             checkout scm
-            //docker.image('maven:3.3.3-jdk-8').run("-w ${workspaceDir} ")
-            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:3.3.3-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo clean install"
+            //using specific mavne repo directory '/maven-repo' to cache dependencies for later builds
+            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo clean install"
             sh "docker commit maven-build kmadel/${config.repo}-build"
             sh "docker rm -f maven-build"
+            //sign in to registry
             withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
                 sh "docker push kmadel/${config.repo}-build"
             }
@@ -49,6 +51,7 @@ def call(body) {
         docker.image("kmadel/${config.repo}-build").inside(){
             sh "mvn -Dmaven.repo.local=/maven-repo clean install"
         }
-        mail to: "${config.email}", subject: "${config.repo} plugin build", body: "The build for ${config.org}/${config.repo} was successful"
+        currentBuild.result = "success"
+        hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: ${config.hipChatRoom}, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
     }
 }
