@@ -1,0 +1,19 @@
+<h2>githubProtectBranch step</h2>
+<h3>Configuration</h3>
+<dl>
+	<dt>branches</dt>
+	<dd>List of branches to set protected status on</dd>
+	<dt>API URL</dt>
+	<dd>GitHub API URL to use</dd>
+	<dt>Credentials ID</dt>
+	<dd>ID of GitHub username/password credentials set to use from Jenkins</dd>
+	<dt>org</dt>
+	<dd>org/user of repo - for example<pre><b>sa-demo</b>/todo-api</pre></dd>
+	<dt>repo</dt>
+	<dd>repo name - for example: <pre>todo-api</pre></dd>
+</dl>
+
+<h3>Example:</h3>
+<pre>
+	githubProtectBranch(['master','feature-one'],'https://github.beescloud.com/api/v3','3ebff2f8-1013-42ff-a1e4-6d74e99f4ca1','sa-team','todo-api')
+</pre>
