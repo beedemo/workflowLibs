@@ -28,5 +28,9 @@ Global Pipeline Libraries
   - org: org/user of repo - for example sa-demo in `sa-demo/todo-api`
   - repo: name of repo of branch
 ```
-githubProtectBranch(['master','feature-one'],'https://github.enterprise.com/api/v3','3ebff2f8-1013-42ff-a1e4-6d74e99f4ca1','sa-team','todo-api')
+githubProtectBranch(['master','feature-one'],
+'https://github.enterprise.com/api/v3',
+'3ebff2f8-1013-42ff-a1e4-6d74e99f4ca1',
+'sa-team',
+'todo-api')
 ```
