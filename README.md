@@ -2,7 +2,7 @@
 Global Pipeline Libraries for SA Jenkins demo environments.
 
 ##Steps
-###mavenProject
+####mavenProject
 - `mavenProject`: provides simple config as Pipeline for maven based projects
   - org: GitHub organization or user repo is under
   - repo: GitHub repository being built
@@ -24,7 +24,7 @@ Global Pipeline Libraries for SA Jenkins demo environments.
 		protectedBranches = ['master']
 	}
 ```
-###githubProtectBranch
+####githubProtectBranch
 - `githubProtectBranch`: sets protection status of rep branch(es)
   - branches: list of strings specifying branches to set protected status on
   - API URL: GitHub API URL to use
