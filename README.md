@@ -33,10 +33,10 @@ Global Pipeline Libraries for SA Jenkins demo environments.
   - repo: name of repo of branch
 
 *Example:*
-```
+```groovy
 githubProtectBranch(['master','feature-one'],
-'https://github.enterprise.com/api/v3',
-'3ebff2f8-1013-42ff-a1e4-6d74e99f4ca1',
-'sa-team',
-'todo-api')
+  'https://github.enterprise.com/api/v3',
+  '3ebff2f8-1013-42ff-a1e4-6d74e99f4ca1',
+  'sa-team',
+  'todo-api')
 ```
