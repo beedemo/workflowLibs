@@ -3,6 +3,8 @@ Pipeline Global Libraries for SA Jenkins demo environments.
 
 For more information on setting up and using Pipeline Global Libraries please see the documentation on GitHub: https://github.com/jenkinsci/workflow-plugin/tree/master/cps-global-lib.
 
+It is good practice
+
 ##Global Steps
 ####mavenProject
 - `mavenProject`: provides simple config as Pipeline for maven based projects
