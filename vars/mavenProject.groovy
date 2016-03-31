@@ -47,11 +47,15 @@ def call(body) {
     stage 'build'
     // now build, based on the configuration provided
     node('docker-cloud') {
-        checkout scm
-        docker.image("kmadel/${config.repo}-build").inside(){
-            sh "mvn -Dmaven.repo.local=/maven-repo clean install"
+        try {
+            checkout scm
+            docker.image("kmadel/${config.repo}-build").inside(){
+                sh "mvn -Dmaven.repo.local=/maven-repo clean install"
+            }
+            currentBuild.result = "success"
+            hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
+        } catch (e) {
+            currentBuild.result = "failure"
+            hipchatSend color: 'RED', textFormat: true, message: "(angry) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
         }
-        currentBuild.result = "success"
-        hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
-    }
 }
