@@ -1,7 +1,7 @@
 # workflowLibs
 Pipeline Global Libraries for SA Jenkins demo environments. 
 
-For more information on setting and using Pipeline Global Libraries please the page on GitHub: https://github.com/jenkinsci/workflow-plugin/tree/master/cps-global-lib.
+For more information on setting and using Pipeline Global Libraries please see the documentation on GitHub: https://github.com/jenkinsci/workflow-plugin/tree/master/cps-global-lib.
 
 ##Steps
 ####mavenProject
