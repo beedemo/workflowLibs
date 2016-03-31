@@ -1,7 +1,8 @@
 # workflowLibs
-Global Pipeline Libraries
+Global Pipeline Libraries for SA Jenkins demo environments.
 
 ##Steps
+###mavenProject
 - `mavenProject`: provides simple config as Pipeline for maven based projects
   - org: GitHub organization or user repo is under
   - repo: GitHub repository being built
@@ -11,7 +12,7 @@ Global Pipeline Libraries
   - rebuildBuildImage: boolean that controls whether or not to refresh existing repo specific Docker build image based on the `maven' image
   - protectedBranches: allows to specify name(s) of branch(es) to protected and use Jenkins to control status, uses the `githubProtrectBranch` step documented below
   
-Example:
+*Example:*
 ```groovy
 	mavenProject {
 		org = 'sa-team'
@@ -23,7 +24,7 @@ Example:
 		protectedBranches = ['master']
 	}
 ```
-
+###githubProtectBranch
 - `githubProtectBranch`: sets protection status of rep branch(es)
   - branches: list of strings specifying branches to set protected status on
   - API URL: GitHub API URL to use
@@ -31,7 +32,7 @@ Example:
   - org: org/user of repo - for example sa-demo in `sa-demo/todo-api`
   - repo: name of repo of branch
 
-Example:
+*Example:*
 ```
 githubProtectBranch(['master','feature-one'],
 'https://github.enterprise.com/api/v3',
