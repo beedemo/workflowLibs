@@ -34,7 +34,7 @@ def call(body) {
             echo "buildImage needs to be built and pushed for ${config.repo}"
             def workspaceDir = pwd()
             checkout scm
-            //using specific mavne repo directory '/maven-repo' to cache dependencies for later builds
+            //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
             sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo clean install"
             sh "docker commit maven-build kmadel/${config.repo}-build"
             sh "docker rm -f maven-build"
