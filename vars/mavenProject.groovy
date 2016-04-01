@@ -36,10 +36,12 @@ def call(body) {
             checkout scm
             //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
             sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo clean install"
+            //create a repo specific build image based on previous run
             sh "docker commit maven-build kmadel/${config.repo}-build"
             sh "docker rm -f maven-build"
             //sign in to registry
             withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
+                //push repo specific image to Docker registry (DockerHub in this case)
                 sh "docker push kmadel/${config.repo}-build"
             }
         }
@@ -49,6 +51,7 @@ def call(body) {
     node('docker-cloud') {
         try {
             checkout scm
+            //build with repo specific build image
             docker.image("kmadel/${config.repo}-build").inside(){
                 sh "mvn -Dmaven.repo.local=/maven-repo clean install"
             }
