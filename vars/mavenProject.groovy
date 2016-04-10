@@ -57,7 +57,7 @@ def call(body) {
             docker.image("kmadel/${config.repo}-build").inside(){
                 sh "mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
             }
-            echo 'stashing target directory
+            echo 'stashing target directory'
             stash name: "target-stash", includes: "target/*"'
             currentBuild.result = "success"
             hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
