@@ -5,6 +5,8 @@ def call(body) {
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = config
     body()
+    //default to 'clean install'
+    def mvnBuildCmd = config.mavenBuildCommand ?: 'clean install'
     //default to jdk 8
     def jdkVersion = config.jdk ?: 8
     def mavenVersion = config.maven ?: '3.3.3'
@@ -35,7 +37,7 @@ def call(body) {
             def workspaceDir = pwd()
             checkout scm
             //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
-            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo clean install"
+            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
             //create a repo specific build image based on previous run
             sh "docker commit maven-build kmadel/${config.repo}-build"
             sh "docker rm -f maven-build"
@@ -53,7 +55,7 @@ def call(body) {
             checkout scm
             //build with repo specific build image
             docker.image("kmadel/${config.repo}-build").inside(){
-                sh "mvn -Dmaven.repo.local=/maven-repo clean install"
+                sh "mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
             }
             currentBuild.result = "success"
             hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
