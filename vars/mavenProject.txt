@@ -11,6 +11,8 @@
 	<dd><b>OPTIONAL</b> JDK version to use for build - for example: <pre>8</pre> - defaults to 8</dd>
 	<dt>maven</dt>
 	<dd><b>OPTIONAL</b> Maven version to use for build - for example: <pre>3.3.3</pre></dd>
+	<dt>mavenBuildCommand</dt>
+	<dd><b>OPTIONAL</b> Maven command to execute for build - for example, default is: <pre>clean install</pre></dd>
 	<dt>rebuildBuildImage</dt>
 	<dd><b>OPTIONAL</b> force rebuilding of Docker image used for build (caches maven dependencies in image) - for example: <pre>true</pre></dd>
 	<dt>protectedBranches</dt>
@@ -25,6 +27,7 @@
 		hipChatRoom = '1613593'
 		jdk = '8'
 		maven = '3.3.3'
+		mavenBuildCommand = 'package'
 		rebuildBuildImage = true
 		protectedBranches = ['master']
 	}
