@@ -12,7 +12,7 @@
 	<dt>maven</dt>
 	<dd><b>OPTIONAL</b> Maven version to use for build - for example: <pre>3.3.3</pre> - defaults to 3.3.3</dd>
 	<dt>mavenBuildCommand</dt>
-	<dd><b>OPTIONAL</b> Maven command to execute for build - for example, default is: <pre>clean install</pre></dd>
+	<dd><b>OPTIONAL</b> Maven command to execute for build - for example: <pre>package -DskipTests</pre> - defaults to 'clean install'</dd>
 	<dt>rebuildBuildImage</dt>
 	<dd><b>OPTIONAL</b> force rebuilding of Docker image used for build (caches maven dependencies in image) - for example: <pre>true</pre></dd>
 	<dt>protectedBranches</dt>
