@@ -12,6 +12,8 @@ def call(body) {
     def mavenVersion = config.maven ?: '3.3.3'
     echo "building with JDK ${jdkVersion}"
     def rebuildBuildImage = config.rebuildBuildImage ?: false
+    //will use docker commit and push to update custom build image
+    def updateBuildImage = config.updateBuildImage ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
     stage 'update protected branches'
     if(config.protectedBranches!=null && !config.protectedBranches.empty){
@@ -31,6 +33,20 @@ def call(body) {
             if(rebuildBuildImage){
                 echo "rebuild of buildImage ${config.repo}-build requested"
                 error "rebuild of buildImage ${config.repo}-build requested"
+            } else if(updateBuildImage) {
+                echo "buildImage to be updated and pushed for ${config.repo}"
+                def workspaceDir = pwd()
+                checkout scm
+                //refreshed image, useful if there are one or more new dependencies
+                sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                            //create a repo specific build image based on previous run
+                sh "docker commit maven-build kmadel/${config.repo}-build"
+                sh "docker rm -f maven-build"
+                //sign in to registry
+                withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
+                    //push repo specific image to Docker registry (DockerHub in this case)
+                    sh "docker push kmadel/${config.repo}-build"
+                }
             }
         } catch (e) {
             echo "buildImage needs to be built and pushed for ${config.repo}"
