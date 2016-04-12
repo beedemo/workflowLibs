@@ -5,6 +5,8 @@ def call(body) {
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = config
     body()
+    //don't need to build again if done as part of creating or updating custom Docker build image
+    def doBuild = true
     //default to 'clean install'
     def mvnBuildCmd = config.mavenBuildCommand ?: 'clean install'
     //default to jdk 8
@@ -24,7 +26,7 @@ def call(body) {
     } else {
         echo 'no branches set to protect'
     }
-    stage 'set up build image'
+    stage 'create/update build image'
     node('docker-cloud') {
         def buildImage
         try {
@@ -47,6 +49,9 @@ def call(body) {
                     //push repo specific image to Docker registry (DockerHub in this case)
                     sh "docker push kmadel/${config.repo}-build"
                 }
+                //stash an set skip build
+                stash name: "target-stash", includes: "target/*"
+                doBuild = false
             }
         } catch (e) {
             echo "buildImage needs to be built and pushed for ${config.repo}"
@@ -62,25 +67,33 @@ def call(body) {
                 //push repo specific image to Docker registry (DockerHub in this case)
                 sh "docker push kmadel/${config.repo}-build"
             }
+            //stash an set skip build
+            stash name: "target-stash", includes: "target/*"
+            doBuild = false
         }
     }
     stage 'build'
-    // now build, based on the configuration provided
-    node('docker-cloud') {
-        try {
-            checkout scm
-            //build with repo specific build image
-            docker.image("kmadel/${config.repo}-build").inside(){
-                sh "mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+    // now build, based on the configuration provided, 
+    //if not already built as part of creating or upgrading custom Docker build image
+    if(doBuild) {
+        node('docker-cloud') {
+            try {
+                checkout scm
+                //build with repo specific build image
+                docker.image("kmadel/${config.repo}-build").inside(){
+                    sh "mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                }
+                echo 'stashing target directory'
+                stash name: "target-stash", includes: "target/*"
+                currentBuild.result = "success"
+                hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
+            } catch (e) {
+                currentBuild.result = "failure"
+                hipchatSend color: 'RED', textFormat: true, message: "(angry) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
             }
-            echo 'stashing target directory'
-            stash name: "target-stash", includes: "target/*"
-            currentBuild.result = "success"
-            hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
-        } catch (e) {
-            currentBuild.result = "failure"
-            hipchatSend color: 'RED', textFormat: true, message: "(angry) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
         }
+    } else {
+        echo "already completed build in 'create/update build image' stage"
     }
     if(env.BRANCH_NAME=="master"){
         stage name: 'Deploy to Prod', concurrency: 1
