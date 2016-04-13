@@ -13,6 +13,8 @@ def call(body) {
     def jdkVersion = config.jdk ?: 8
     def mavenVersion = config.maven ?: '3.3.3'
     echo "building with JDK ${jdkVersion}"
+    //if any maven dependency changes are detected, then will auto-update
+    def autoUpdateBuildImage = config.autoUpdateBuildImage ?: true
     def rebuildBuildImage = config.rebuildBuildImage ?: false
     //will use docker commit and push to update custom build image
     def updateBuildImage = config.updateBuildImage ?: false
