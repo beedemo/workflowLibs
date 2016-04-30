@@ -60,7 +60,7 @@ def call(body) {
             def workspaceDir = pwd()
             checkout scm
             //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
-            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} beedemo/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+            sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
             //create a repo specific build image based on previous run
             sh "docker commit maven-build beedemo/${config.repo}-build"
             sh "docker rm -f maven-build"
