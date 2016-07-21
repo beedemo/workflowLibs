@@ -31,7 +31,7 @@ def call(body) {
           withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
             dockerImage.push()
             if(tagAsLatest) {
-              dockerImage.push("${dockerUserOrg}/${dockerRepoName}:latest")
+              dockerImage.push("latest")
             }
           }
     }
