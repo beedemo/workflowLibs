@@ -10,11 +10,16 @@ def call(body) {
     tokens = "${env.JOB_NAME}".tokenize('/')
     org = tokens[tokens.size()-3]
     repo = tokens[tokens.size()-2]
-    branch = tokens[tokens.size()-1]
+    tag = tokens[tokens.size()-1]
+    
+    def d = [org: org, repo: repo, tag: tag]
+    def props = readProperties defaults: d, file: 'dockerBuildPublish.properties', text: 'other=Override'
+        assert props['test'] == 'One'
+    
     def tagAsLatest = config.tagAsLatest ?: true
-    def dockerUserOrg = config.dockerUserOrg ?: org
-    def dockerRepoName = config.dockerRepoName ?: repo
-    def dockerTag = config.dockerTag ?: branch
+    def dockerUserOrg = props['org']
+    def dockerRepoName = props['repo']
+    def dockerTag = props['tag']
     
     //config.dockerHubCredentialsId is required
     if(!config.dockerHubCredentialsId) {
