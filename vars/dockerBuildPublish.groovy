@@ -19,7 +19,7 @@ def call(body) {
         tag = tokens[tokens.size()-1]
     
         def d = [org: org, repo: repo, tag: tag]
-        def props = readProperties defaults: d, file: 'dockerBuildPublish.properties', text: 'other=Override'
+        def props = readProperties defaults: d, file: 'dockerBuildPublish.properties'
     
         def tagAsLatest = config.tagAsLatest ?: true
         def dockerUserOrg = props['org']
