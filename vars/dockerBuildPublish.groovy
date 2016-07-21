@@ -15,6 +15,11 @@ def call(body) {
     def dockerUserOrg = config.dockerUserOrg ?: org
     def dockerRepoName = config.dockerRepoName ?: repo
     def dockerTag = config.dockerTag ?: branch
+    
+    //config.dockerHubCredentialsId is required
+    if(!config.dockerHubCredentialsId) {
+        error 'dockerHubCredentialsId is required'
+    }
 
     def dockerImage
     node('docker-cloud') {
@@ -23,7 +28,7 @@ def call(body) {
         dockerImage = docker.build "${dockerUserOrg}/${dockerRepoName}:${dockerTag}"
     
       stage 'Publish Docker Image'
-          withDockerRegistry(registry: [credentialsId: 'docker-hub-kb']) {
+          withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
             dockerImage.push()
             if(tagAsLatest) {
               dockerImage.push("${dockerUserOrg}/${dockerRepoName}:latest")
