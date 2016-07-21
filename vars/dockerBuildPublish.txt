@@ -1,19 +1,3 @@
-Skip to content
-This repository
-Search
-Pull requests
-Issues
-Gist
- @kmadel
- Watch 8
-  Star 2
- Fork 0 beedemo/workflowLibs
- Code  Issues 0  Pull requests 0  Wiki  Pulse  Graphs  Settings
-Branch: test Find file Copy pathworkflowLibs/dockerBuildPublish.txt
-b1d16a0  12 minutes ago
-@kmadel kmadel Create dockerBuildPublish.txt
-1 contributor
-RawBlameHistory     29 lines (27 sloc)  1.38 KB
 <h2>dockerBuildPublish step</h2>
 <p>
 Provides a custom step to build and push a Docker image to Docker Hub based on a Dockerfile in a branch of a GitHub Organziation Folder Pipeline project.
@@ -42,5 +26,3 @@ Provides a custom step to build and push a Docker image to Docker Hub based on a
 		tagAsLatest = false
 	}
 </pre>
-Contact GitHub API Training Shop Blog About
-© 2016 GitHub, Inc. Terms Privacy Security Status Help
