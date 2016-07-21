@@ -1,0 +1,28 @@
+<h2>dockerBuildPublish step</h2>
+<p>
+Provides a custom step to build and push a Docker image to Docker Hub based on a Dockerfile in a branch of a GitHub Organziation Folder Pipeline project.
+</p>
+<h3>Configuration</h3>
+<dl>
+	<dt>dockerHubCredentialsId</dt>
+	<dd><b>REQUIRED</b> Jenkins Credentials ID for DockerHub credentials with permissions to push to deisgnate Docker Hub Org/Account</dd>
+	<dt>dockerUserOrg</dt>
+	<dd><b>OPTIONAL</b> org/user to push Docker image - for example<pre><b>beedemo</b>/todo-api</pre> - defaults to GitHub user or org</dd>
+	<dt>dockerRepoName</dt>
+	<dd><b>OPTIONAL</b> docker repo name for Docker image to be pushed - for example: <pre>mobile-depoist-api</pre> - defaults to GitHub repo name</dd>
+	<dt>dockerTag</dt>
+	<dd><b>OPTIONAL</b> docker tag for Docker image to be pushed - for example: <pre>1.1</pre> - defaults to GitHub branch name</dd>
+	<dt>tagAsLatest</dt>
+	<dd><b>OPTIONAL</b> allows overriding auto tagging and pushing of built image as latest - for example: <pre>false</pre> - defaults to <pre>true</pre></dd>
+</dl>
+
+<h3>Example:</h3>
+<p>The following example would result in a Docker image with the name and tag of 'beedemo/mobile-deposit-api:1.1' being built and pushed.</p>
+<pre>
+	dockerBuildPublish {
+		dockerHubCredentialsId = 'beedemo-docker-hub-credentials'
+		dockerUserOrg = 'beedemo'
+		dockerRepoName = 'mobile-deposit-api'
+		tagAsLatest = false
+	}
+</pre>
