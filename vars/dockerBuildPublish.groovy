@@ -8,9 +8,9 @@ def call(body) {
     //tagAsLatest defaults to latest
     // github-organization-plugin jobs are named as 'org/repo/branch'
     tokens = "${env.JOB_NAME}".tokenize('/')
-    org = tokens[list.size()-3]
-    repo = tokens[list.size()-2]
-    branch = tokens[list.size()-1]
+    org = tokens[tokens.size()-3]
+    repo = tokens[tokens.size()-2]
+    branch = tokens[tokens.size()-1]
     def tagAsLatest = config.tagAsLatest ?: true
     def dockerUserOrg = config.dockerUserOrg ?: org
     def dockerRepoName = config.dockerRepoName ?: repo
