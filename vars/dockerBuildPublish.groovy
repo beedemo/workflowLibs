@@ -18,7 +18,7 @@ def call(body) {
         repo = tokens[tokens.size()-2]
         tag = tokens[tokens.size()-1]
     
-        def d = [org: org, repo: repo, tag: tag]
+        def d = [org: org, repo: repo, tag: tag, passTag: false, useTriggerTag: false]
         def props = readProperties defaults: d, file: 'dockerBuildPublish.properties'
     
         def tagAsLatest = config.tagAsLatest ?: true
@@ -26,9 +26,18 @@ def call(body) {
         def dockerRepoName = props['repo']
         def dockerTag = props['tag']
         def dockerHubTriggerImage = props['dockerHubTriggerImage']
+        def dockerBuildArgs = ''
+        def tagArg = ''
         if(dockerHubTriggerImage) {
             properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: [dockerHubTriggerImage] as Set]]]]), 
                 [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]])
+                //check if trigger tag should be passed in as build argument
+                if(props['passTag'] && env.DOCKER_TRIGGER_TAG) {
+                    dockerBuildArgs = dockerBuildArgs + "--build-arg TAG_FROM_TRIGGER=${env.DOCKER_TRIGGER_TAG}"
+                }
+                if(props['useTriggerTag'] && env.DOCKER_TRIGGER_TAG) {
+                    dockerTag = env.DOCKER_TRIGGER_TAG
+                }
         }
     
         //config.dockerHubCredentialsId is required
@@ -36,7 +45,7 @@ def call(body) {
             error 'dockerHubCredentialsId is required'
         }
       stage 'Build Docker Image'
-        dockerImage = docker.build "${dockerUserOrg}/${dockerRepoName}:${dockerTag}"
+        dockerImage = docker.build(image: "${dockerUserOrg}/${dockerRepoName}:${dockerTag}", args: dockerBuildArgs)
     
       stage 'Publish Docker Image'
           withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
