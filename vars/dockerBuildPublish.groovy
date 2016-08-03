@@ -31,13 +31,15 @@ def call(body) {
         if(dockerHubTriggerImage) {
             properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: [dockerHubTriggerImage] as Set]]]]), 
                 [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]])
-                //check if trigger tag should be passed in as build argument
-                if(props['passTag'] && env.DOCKER_TRIGGER_TAG) {
-                    dockerBuildArgs = dockerBuildArgs + "--build-arg TAG_FROM_TRIGGER=${env.DOCKER_TRIGGER_TAG}"
-                }
-                if(props['useTriggerTag'] && env.DOCKER_TRIGGER_TAG) {
-                    dockerTag = env.DOCKER_TRIGGER_TAG
-                }
+            //check if trigger tag should be passed in as build argument
+            if(props['passTag'] && env.DOCKER_TRIGGER_TAG) {
+                echo "passing trigger tags as build-arg: ${env.DOCKER_TRIGGER_TAG}"
+                dockerBuildArgs = dockerBuildArgs + "--build-arg TAG_FROM_TRIGGER=${env.DOCKER_TRIGGER_TAG}"
+            }
+            if(props['useTriggerTag'] && env.DOCKER_TRIGGER_TAG) {
+                echo "using trigger tags as image tag: ${env.DOCKER_TRIGGER_TAG}"
+                dockerTag = env.DOCKER_TRIGGER_TAG
+            }
         }
     
         //config.dockerHubCredentialsId is required
@@ -45,7 +47,7 @@ def call(body) {
             error 'dockerHubCredentialsId is required'
         }
       stage 'Build Docker Image'
-        dockerImage = docker.build(image: "${dockerUserOrg}/${dockerRepoName}:${dockerTag}", args: dockerBuildArgs)
+        dockerImage = docker.build("${dockerUserOrg}/${dockerRepoName}:${dockerTag}", dockerBuildArgs)
     
       stage 'Publish Docker Image'
           withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
