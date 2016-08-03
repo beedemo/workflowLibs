@@ -25,6 +25,11 @@ def call(body) {
         def dockerUserOrg = props['org']
         def dockerRepoName = props['repo']
         def dockerTag = props['tag']
+        def dockerHubTriggerImage = props['dockerHubTriggerImage']
+        if(dockerHubTriggerImage) {
+            properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: [dockerHubTriggerImage] as Set]]]]), 
+                [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]])
+        }
     
         //config.dockerHubCredentialsId is required
         if(!config.dockerHubCredentialsId) {
