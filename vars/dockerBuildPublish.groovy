@@ -26,7 +26,7 @@ def call(body) {
         def dockerRepoName = props['repo']
         def dockerTag = props['tag']
         def dockerHubTriggerImage = props['dockerHubTriggerImage']
-        def dockerBuildArgs = ''
+        def dockerBuildArgs = ' .'
         def tagArg = ''
         if(dockerHubTriggerImage) {
             properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: [dockerHubTriggerImage] as Set]]]]), 
@@ -34,7 +34,7 @@ def call(body) {
             //check if trigger tag should be passed in as build argument
             if(props['passTag'] && env.DOCKER_TRIGGER_TAG) {
                 echo "passing trigger tags as build-arg: ${env.DOCKER_TRIGGER_TAG}"
-                dockerBuildArgs = dockerBuildArgs + "--build-arg TAG_FROM_TRIGGER=${env.DOCKER_TRIGGER_TAG}"
+                dockerBuildArgs = "--build-arg TAG_FROM_TRIGGER=${env.DOCKER_TRIGGER_TAG}" + dockerBuildArgs
             }
             if(props['useTriggerTag'] && env.DOCKER_TRIGGER_TAG) {
                 echo "using trigger tags as image tag: ${env.DOCKER_TRIGGER_TAG}"
