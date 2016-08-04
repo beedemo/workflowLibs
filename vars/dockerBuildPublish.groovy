@@ -7,7 +7,7 @@ def call(body) {
     body()
 
     def dockerImage
-    node('docker-cloud') {
+    node('dind') {
       stage 'Configure Properties'
         //need to check for properties file from SCM
         checkout scm
