@@ -1,1 +1,2 @@
+<h2>dockerCloudDeploy step</h2>
 <p>Uses Docker Cloud REST API to deploy image to Docker Cloud.</p>
