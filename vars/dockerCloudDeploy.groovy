@@ -8,7 +8,6 @@ def jsonParse(def json) {
 
 def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
 
-  stage 'deploy'
   node(nodeLabel) {
       def getServiceResp = httpRequest acceptType: 'APPLICATION_JSON', httpMode: 'GET', authentication: "$httpRequestAuthId", url: "https://cloud.docker.com/api/app/v1/service/?name=$name", validResponseCodes: '100:500'
       def getServiceRespObj = jsonParse(getServiceResp.content)
