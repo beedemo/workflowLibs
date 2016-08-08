@@ -47,6 +47,7 @@ def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
         def updateServiceObj = jsonParse(updateServiceResp.content)
         println("Status: "+updateServiceResp.status)
         println("Content: "+updateServiceObj) 
+        println("Headers: "+updateServiceResp.headers) 
       }
       //deploy the service
       //POST /api/app/v1/service/(uuid)/redeploy/
