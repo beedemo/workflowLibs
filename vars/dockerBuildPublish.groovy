@@ -48,13 +48,14 @@ def call(body) {
         }
       stage 'Build Docker Image'
         dockerImage = docker.build("${dockerUserOrg}/${dockerRepoName}:${dockerTag}", dockerBuildArgs)
-    
-      stage 'Publish Docker Image'
-          withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
-            dockerImage.push()
-            if(tagAsLatest) {
-              dockerImage.push("latest")
-            }
-          }
+        if(env.BRANCH_NAME=="master") {
+          stage 'Publish Docker Image'
+              withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
+                dockerImage.push()
+                if(tagAsLatest) {
+                  dockerImage.push("latest")
+                }
+              }
+        }
     }
 }
