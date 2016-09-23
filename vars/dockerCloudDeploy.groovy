@@ -3,7 +3,7 @@ import groovy.json.*
 
 @NonCPS
 def jsonParse(def json) {
-    new groovy.json.JsonSlurper().parseText(json)
+    new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
 def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
