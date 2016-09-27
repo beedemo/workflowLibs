@@ -56,7 +56,7 @@ def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
       def deployServiceObj = jsonParse(deployServiceResp.content)
       println("Status: "+deployServiceResp.status)
       println("Redeploy response: "+deployServiceObj)
-      def artirfact = deployServiceObj.image_name
+      def artifact = deployServiceObj.image_name
       def deployUrl = deployServiceObj.container_ports[0].endpoint_uri
       println("service endpoint: "+deployUrl)
       def deployActionEndpoint = deployServiceResp.headers['X-DockerCloud-Action-URI']
