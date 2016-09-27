@@ -13,6 +13,7 @@ def call(esHost, esHttpReqAuthId, environment, applicationName, artifact, deploy
   def tokens = "${env.JOB_NAME}".tokenize('/')
   def name = tokens[tokens.size()-1]
   def url = "${esHost}/${esIndex}/${name}/${deployId}"
+  def completedDate = Date.parse('EEE, d MMM yyyy HH:mm:ss Z', completed)
 
     def deployJson = """
         {
@@ -25,7 +26,7 @@ def call(esHost, esHttpReqAuthId, environment, applicationName, artifact, deploy
             "artifact": "$artifact",
             "deploy_url": "$deployUrl",
             "result": "$currentBuild.result",
-            "completed": "$completed"
+            "@timestamp": new Timestamp(completedDate.time)
         }
      """
     def resp = httpRequest acceptType: 'APPLICATION_JSON', contentType: 'APPLICATION_JSON', httpMode: 'PUT', requestBody: deployJson, authentication: "$esHttpReqAuthId", url: "$url", validResponseCodes: '100:500'
