@@ -78,6 +78,6 @@ def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
         }
       }
       println("deploy action response: " + deployActionObj)
-      deployAnalytics("http://elasticsearch.jenkins.beedemo.net", "es-auth", "docker cloud", "mobile-deposit-api", artifact, deployUrl, deployActionObj.end_date, deployActionObj.uuid)
+      deployAnalytics("http://elasticsearch.jenkins.beedemo.net", "es-auth", "docker cloud", "mobile-deposit-api", artifact, deployUrl, deployActionObj.end_date, deployActionObj.uuid, deployActionObj.state)
   }
 }
