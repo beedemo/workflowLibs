@@ -5,7 +5,7 @@ def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
-def call(esHost, esHttpReqAuthId, environment, applicationName, artifact, deployUrl, completed, deployId) {
+def call(esHost, esHttpReqAuthId, environment, applicationName, artifact, deployUrl, completed, deployId, result) {
   //set up path for index
   def dateSuffix = new Date().format( 'yyyy-MM' )
   def esIndex = "deploys-$dateSuffix"
@@ -24,7 +24,7 @@ def call(esHost, esHttpReqAuthId, environment, applicationName, artifact, deploy
             "application_name": "$applicationName",
             "artifact": "$artifact",
             "deploy_url": "$deployUrl",
-            "result": "$currentBuild.result",
+            "result": "$result",
             "@timestamp": "$completed"
         }
      """
