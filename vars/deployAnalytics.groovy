@@ -8,15 +8,15 @@ def jsonParse(def json) {
 def call(esHost, esHttpReqAuthId, environment, applicationName, artifact, deployUrl, completed, deployId) {
   //set up path for index
   def dateSuffix = new Date().format( 'yyyy-MM' )
-  def esIndex = "deploy-$dateSuffix"
+  def esIndex = "deploys-$dateSuffix"
 
   def tokens = "${env.JOB_NAME}".tokenize('/')
   def name = tokens[tokens.size()-1]
-  def url = "${esHost}/${esIndex}/${name}/${deployId}"
+  def url = "${esHost}/${esIndex}/deploy/${deployId}"
 
     def deployJson = """
         {
-            "project_name": "$name",
+            "scm_branch": "$name",
             "job_name": "$env.JOB_NAME",
             "job_url": "$env.JOB_URL",
             "build_url": "$env.BUILD_URL",
