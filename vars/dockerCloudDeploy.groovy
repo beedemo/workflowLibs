@@ -55,13 +55,13 @@ def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
       println("Status: "+deployServiceResp.status)
       println("Content: "+deployServiceObj) 
       println("service endpoint: "+deployServiceObj.container_ports[0].endpoint_uri)
-      def deployActionEndpoint = deployServiceResp.headers['X-DockerCloud-Action-URI']
       println("X-DockerCloud-Action-URI: "+deployActionEndpoint)
       // WAIT FOR DOCKER CLOUD DEPLOYMENT
+      def deployActionObj = null
       timeout(time: 2, unit: 'MINUTES') {
         waitUntil {
             def deployActionResp = httpRequest acceptType: 'APPLICATION_JSON', httpMode: 'GET', authentication: "$httpRequestAuthId", url: "https://cloud.docker.com$deployActionEndpoint", validResponseCodes: '100:500'
-            def deployActionObj = jsonParse(deployActionResp.content)
+            deployActionObj = jsonParse(deployActionResp.content)
             println("Status: "+deployActionResp.status)
             println("Deployment Action State: "+deployActionObj.state) 
             if(deployActionObj.state == "Failed") {
@@ -70,5 +70,6 @@ def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
             return deployActionObj.state == "Success"
         }
       }
+      println("deploy action response: " + deployActionObj)
   }
 }
