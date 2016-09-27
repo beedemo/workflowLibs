@@ -5,10 +5,10 @@ def jsonParse(def json) {
     new groovy.json.JsonSlurperClassic().parseText(json)
 }
 
-def dateSuffix = new Date().format( 'yyyy-MM' )
-def esIndex = "deploy-$dateSuffix"
-
 def call(esHost, esHttpReqAuthId, environment, applicationName, artifact, deployUrl, completed, deployId) {
+  //set up path for index
+  def dateSuffix = new Date().format( 'yyyy-MM' )
+  def esIndex = "deploy-$dateSuffix"
 
   def tokens = "${env.JOB_NAME}".tokenize('/')
   def name = tokens[tokens.size()-1]
