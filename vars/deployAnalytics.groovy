@@ -12,7 +12,7 @@ def call(esHost, esHttpReqAuthId, environment, applicationName, artifact, deploy
 
   def tokens = "${env.JOB_NAME}".tokenize('/')
   def name = tokens[tokens.size()-1]
-  def url = "${esHost}/${esIndex}/${name}/${deployId}
+  def url = "${esHost}/${esIndex}/${name}/${deployId}"
 
     def deployJson = """
         {
