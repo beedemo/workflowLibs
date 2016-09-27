@@ -55,6 +55,7 @@ def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
       println("Status: "+deployServiceResp.status)
       println("Content: "+deployServiceObj) 
       println("service endpoint: "+deployServiceObj.container_ports[0].endpoint_uri)
+      def deployActionEndpoint = deployServiceResp.headers['X-DockerCloud-Action-URI']
       println("X-DockerCloud-Action-URI: "+deployActionEndpoint)
       // WAIT FOR DOCKER CLOUD DEPLOYMENT
       def deployActionObj = null
