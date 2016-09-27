@@ -55,8 +55,10 @@ def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
       def deployServiceResp = httpRequest acceptType: 'APPLICATION_JSON', httpMode: 'POST', authentication: "$httpRequestAuthId", url: "https://cloud.docker.com/api/app/v1/service/$uuid/redeploy/", validResponseCodes: '100:500'
       def deployServiceObj = jsonParse(deployServiceResp.content)
       println("Status: "+deployServiceResp.status)
-      println("Content: "+deployServiceObj)
-      println("service endpoint: "+deployServiceObj.container_ports[0].endpoint_uri)
+      println("Redeploy response: "+deployServiceObj)
+      def artirfact = deployServiceObj.image_name
+      def deployUrl = deployServiceObj.container_ports[0].endpoint_uri
+      println("service endpoint: "+deployUrl)
       def deployActionEndpoint = deployServiceResp.headers['X-DockerCloud-Action-URI']
       println("X-DockerCloud-Action-URI: "+deployActionEndpoint)
       // WAIT FOR DOCKER CLOUD DEPLOYMENT
@@ -76,5 +78,6 @@ def call(nodeLabel, imageTag, name, innerPort, outerPort, httpRequestAuthId) {
         }
       }
       println("deploy action response: " + deployActionObj)
+      deployAnalytics("http://elasticsearch.jenkins.beedemo.net", "es-auth", "docker cloud", "mobile-deposit-api", artifact, deployUrl, deployActionObj.end_date, deployActionObj.uuid)
   }
 }
