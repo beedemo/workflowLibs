@@ -5,6 +5,8 @@ def call(body) {
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = config
     body()
+    //used for analytics indexing
+    def short_commit = NULL
     //don't need to build again if done as part of creating or updating custom Docker build image
     def doBuild = true
     //default to 'clean install'
@@ -41,6 +43,9 @@ def call(body) {
                 echo "buildImage to be updated and pushed for ${config.repo}"
                 def workspaceDir = pwd()
                 checkout scm
+                sh('git rev-parse HEAD > GIT_COMMIT')
+                git_commit=readFile('GIT_COMMIT')
+                short_commit=git_commit.take(7)
                 //refreshed image, useful if there are one or more new dependencies
                 sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
                             //create a repo specific build image based on previous run
@@ -83,6 +88,9 @@ def call(body) {
         node('docker-cloud') {
             try {
                 checkout scm
+                sh('git rev-parse HEAD > GIT_COMMIT')
+                git_commit=readFile('GIT_COMMIT')
+                short_commit=git_commit.take(7)
                 //build with repo specific build image
                 docker.image("beedemo/${config.repo}-build").inside(){
                     sh "mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
@@ -102,5 +110,6 @@ def call(body) {
     if(env.BRANCH_NAME=="master"){
         stage name: 'Deploy to Prod', concurrency: 1
         echo "steps for deployment..."
+        deployAnalytics("http://elasticsearch.jenkins.beedemo.net", "es-auth", "Tomcat 8", "${config.repo}", "${config.repo}.war", "NA",  new Date().format("EEE, d MMM yyyy HH:mm:ss Z"), short_commit, "Success")
     }
 }
