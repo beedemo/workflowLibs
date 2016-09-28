@@ -6,7 +6,7 @@ def call(body) {
     body.delegate = config
     body()
     //used for analytics indexing
-    def short_commit = NULL
+    def short_commit
     //don't need to build again if done as part of creating or updating custom Docker build image
     def doBuild = true
     //default to 'clean install'
