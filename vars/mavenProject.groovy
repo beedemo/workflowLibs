@@ -98,7 +98,7 @@ def call(body) {
     } else {
         echo "already completed build in 'create/update build image' stage"
     }
-    if(env.BRANCH_NAME=="master"){
+    if(env.BRANCH_NAME.startsWith("master")){
         stage('Deploy to Prod') {
             if(isDockerDeploy){
                 node {
