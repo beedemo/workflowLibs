@@ -21,15 +21,6 @@ def call(body) {
     //will use docker commit and push to update custom build image
     def updateBuildImage = config.updateBuildImage ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
-    stage 'update protected branches'
-    if(config.protectedBranches!=null && !config.protectedBranches.empty){
-        //set up GitHub protected branches for specified branches
-        def apiUrl = 'https://github.beescloud.com/api/v3'
-        def credentialsId = '3ebff2f8-1013-42ff-a1e4-6d74e99f4ca1'
-        githubProtectBranch(config.protectedBranches, apiUrl, credentialsId, config.org, config.repo)
-    } else {
-        echo 'no branches set to protect'
-    }
     stage 'create/update build image'
     node('docker-cloud') {
         def buildImage
@@ -52,10 +43,10 @@ def call(body) {
                 sh "docker commit maven-build beedemo/${config.repo}-build"
                 sh "docker rm -f maven-build"
                 //sign in to registry
-                withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
+                //withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
                     //push repo specific image to Docker registry (DockerHub in this case)
-                    sh "docker push beedemo/${config.repo}-build"
-                }
+                    //sh "docker push beedemo/${config.repo}-build"
+                //}
                 //stash an set skip build
                 stash name: "target-stash", includes: "target/*"
                 doBuild = false
@@ -72,10 +63,10 @@ def call(body) {
             sh "docker commit maven-build beedemo/${config.repo}-build"
             sh "docker rm -f maven-build"
             //sign in to registry
-            withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
+            //withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
                 //push repo specific image to Docker registry (DockerHub in this case)
-                sh "docker push beedemo/${config.repo}-build"
-            }
+                //sh "docker push beedemo/${config.repo}-build"
+            //}
             //stash an set skip build
             stash name: "target-stash", includes: "target/*"
             doBuild = false
@@ -98,10 +89,8 @@ def call(body) {
                 echo 'stashing target directory'
                 stash name: "target-stash", includes: "target/*"
                 currentBuild.result = "success"
-                hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
             } catch (e) {
                 currentBuild.result = "failure"
-                hipchatSend color: 'RED', textFormat: true, message: "(angry) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
             }
         }
     } else {
@@ -110,6 +99,5 @@ def call(body) {
     if(env.BRANCH_NAME=="master"){
         stage name: 'Deploy to Prod', concurrency: 1
         echo "steps for deployment..."
-        deployAnalytics("http://elasticsearch.jenkins.beedemo.net", "es-auth", "Tomcat 8", "${config.repo}", "${config.repo}.war", "NA",  new Date().format("EEE, d MMM yyyy HH:mm:ss Z"), short_commit, "Success")
     }
 }
