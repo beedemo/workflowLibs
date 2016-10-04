@@ -115,7 +115,7 @@ def call(body) {
                     //unstash JAR and Dockerfile
                     unstash 'target-stash'
                     dir('target') {
-                        deployImage = docker.build "beedemo/mobile-deposit-api:${dockerTag}"
+                        deployImage = docker.build "beedemo/${config.repo}:${dockerTag}"
                     }
                     //just going to run the image
                     deployImage.run("--name ${config.repo} -p ${config.port}:8080")
