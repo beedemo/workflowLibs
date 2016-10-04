@@ -21,7 +21,7 @@ def call(body) {
     //will use docker commit and push to update custom build image
     def updateBuildImage = config.updateBuildImage ?: false
     //build Docker image from mvn package, default to false
-    def isDocker = config.isDocker ?: false
+    def isDockerDeploy = config.isDockerDeploy ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
     stage 'create/update build image'
     node {
@@ -100,7 +100,7 @@ def call(body) {
     }
     if(env.BRANCH_NAME=="master"){
         stage('Deploy to Prod') {
-            if(isDocker){
+            if(isDockerDeploy){
                 node {
                     //first must stop any previous running image for ${config.repo}
                     try{
