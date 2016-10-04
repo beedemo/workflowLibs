@@ -20,9 +20,11 @@ def call(body) {
     def rebuildBuildImage = config.rebuildBuildImage ?: false
     //will use docker commit and push to update custom build image
     def updateBuildImage = config.updateBuildImage ?: false
+    //build Docker image from mvn package, default to false
+    def isDocker = config.isDocker ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
     stage 'create/update build image'
-    node('docker-cloud') {
+    node {
         def buildImage
         try {
             buildImage = docker.image("beedemo/${config.repo}-build").pull()
@@ -76,7 +78,7 @@ def call(body) {
     // now build, based on the configuration provided, 
     //if not already built as part of creating or upgrading custom Docker build image
     if(doBuild) {
-        node('docker-cloud') {
+        node {
             try {
                 checkout scm
                 sh('git rev-parse HEAD > GIT_COMMIT')
@@ -97,7 +99,27 @@ def call(body) {
         echo "already completed build in 'create/update build image' stage"
     }
     if(env.BRANCH_NAME=="master"){
-        stage name: 'Deploy to Prod', concurrency: 1
-        echo "steps for deployment..."
+        stage('Deploy to Prod') {
+            if(isDocker){
+                node {
+                    //first must stop any previous running image for ${config.repo}
+                    try{
+                        sh "docker stop ${config.repo}"
+                        sh "docker rm ${config.repo}"
+                    } catch (Exception _) {
+                        echo "no container to stop"
+                    }
+                    //tag to use for docker deploy image
+                    def dockerTag = "${env.BUILD_NUMBER}-${short_commit}"
+                    def deployImage
+                    //unstash JAR and Dockerfile
+                    unstash 'target-stash'
+                    dir('target') {
+                        deployImage = docker.build "beedemo/mobile-deposit-api:${dockerTag}"
+                    }
+                    //just going to run the image
+                    deployImage.run("--name ${config.repo} -p ${config.port}:8080")
+                }
+        }
     }
 }
