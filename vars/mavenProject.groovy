@@ -59,7 +59,7 @@ def call(body) {
                 echo "buildImage needs to be built and pushed for ${config.repo}"
                 checkout scm
                 //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
-                def shCmd = "docker run --name maven-build --volumes-from ${nodeContainerId} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                def shCmd = "docker run --name maven-build -w ${workspaceDir} --volumes-from ${nodeContainerId} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
                 echo shCmd
                 sh shCmd
                 //create a repo specific build image based on previous run
