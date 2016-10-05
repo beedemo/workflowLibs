@@ -43,7 +43,7 @@ def call(body) {
                     git_commit=readFile('GIT_COMMIT')
                     short_commit=git_commit.take(7)
                     //refreshed image, useful if there are one or more new dependencies
-                    sh "docker run -u 1000:1000 --name maven-build -w ${workspaceDir} --volumes-from ${nodeContainerId} beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo -DGIT_COMMIT=${short_commit} -DBUILD_NUMBER=${env.BUILD_NUMBER} -DBUILD_URL=${env.BUILD_URL} ${mvnBuildCmd}"
+                    sh "docker run -u 1000:1000 --name maven-build -w ${workspaceDir} --volumes-from ${nodeContainerId} beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo -DGIT_COMMIT='${short_commit}' -DBUILD_NUMBER=${env.BUILD_NUMBER} -DBUILD_URL=${env.BUILD_URL} ${mvnBuildCmd}"
                                 //create a repo specific build image based on previous run
                     sh "docker commit maven-build beedemo/${config.repo}-build"
                     sh "docker rm -f maven-build"
@@ -60,7 +60,7 @@ def call(body) {
                 echo "buildImage needs to be built and pushed for ${config.repo}"
                 checkout scm
                 //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
-                def shCmd = "docker run -u 1000:1000 --name maven-build -w ${workspaceDir} --volumes-from ${nodeContainerId} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo -DGIT_COMMIT=${short_commit} -DBUILD_NUMBER=${env.BUILD_NUMBER} -DBUILD_URL=${env.BUILD_URL} ${mvnBuildCmd}"
+                def shCmd = "docker run -u 1000:1000 --name maven-build -w ${workspaceDir} --volumes-from ${nodeContainerId} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo -DGIT_COMMIT='${short_commit}' -DBUILD_NUMBER=${env.BUILD_NUMBER} -DBUILD_URL=${env.BUILD_URL} ${mvnBuildCmd}"
                 echo shCmd
                 sh shCmd
                 //create a repo specific build image based on previous run
@@ -87,6 +87,7 @@ def call(body) {
                     sh('git rev-parse HEAD > GIT_COMMIT')
                     git_commit=readFile('GIT_COMMIT')
                     short_commit=git_commit.take(7)
+                    echo short_commit
                     //build with repo specific build image
                     docker.image("beedemo/${config.repo}-build").inside(){
                         sh "mvn -Dmaven.repo.local=/maven-repo -DGIT_COMMIT='${short_commit}' -DBUILD_NUMBER=${env.BUILD_NUMBER} -DBUILD_URL=${env.BUILD_URL} ${mvnBuildCmd}"
