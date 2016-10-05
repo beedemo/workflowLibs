@@ -102,7 +102,7 @@ def call(body) {
             echo "already completed build in 'create/update build image' stage"
         }
     }
-    if(env.BRANCH_NAME.startsWith("master")) {
+    if(env.BRANCH_NAME.startsWith("jenkins-days")) {
         stage('Deploy to Prod') {
             if(isDockerDeploy) {
                 node {
