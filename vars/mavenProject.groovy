@@ -23,25 +23,45 @@ def call(body) {
     //build Docker image from mvn package, default to false
     def isDockerDeploy = config.isDockerDeploy ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
-    stage 'create/update build image'
-    node {
-        def buildImage
-        try {
-            buildImage = docker.image("beedemo/${config.repo}-build").pull()
-            echo "buildImage already built for ${config.repo}"
-            if(rebuildBuildImage){
-                echo "rebuild of buildImage ${config.repo}-build requested"
-                error "rebuild of buildImage ${config.repo}-build requested"
-            } else if(updateBuildImage) {
-                echo "buildImage to be updated and pushed for ${config.repo}"
+    stage('create/update build image') {
+        node {
+            def buildImage
+            try {
+                buildImage = docker.image("beedemo/${config.repo}-build").pull()
+                echo "buildImage already built for ${config.repo}"
+                if(rebuildBuildImage){
+                    echo "rebuild of buildImage ${config.repo}-build requested"
+                    error "rebuild of buildImage ${config.repo}-build requested"
+                } else if(updateBuildImage) {
+                    echo "buildImage to be updated and pushed for ${config.repo}"
+                    def workspaceDir = pwd()
+                    checkout scm
+                    sh('git rev-parse HEAD > GIT_COMMIT')
+                    git_commit=readFile('GIT_COMMIT')
+                    short_commit=git_commit.take(7)
+                    //refreshed image, useful if there are one or more new dependencies
+                    sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                                //create a repo specific build image based on previous run
+                    sh "docker commit maven-build beedemo/${config.repo}-build"
+                    sh "docker rm -f maven-build"
+                    //sign in to registry
+                    //withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
+                        //push repo specific image to Docker registry (DockerHub in this case)
+                        //sh "docker push beedemo/${config.repo}-build"
+                    //}
+                    //stash an set skip build
+                    stash name: "target-stash", includes: "target/*"
+                    doBuild = false
+                }
+            } catch (e) {
+                echo "buildImage needs to be built and pushed for ${config.repo}"
                 def workspaceDir = pwd()
                 checkout scm
-                sh('git rev-parse HEAD > GIT_COMMIT')
-                git_commit=readFile('GIT_COMMIT')
-                short_commit=git_commit.take(7)
-                //refreshed image, useful if there are one or more new dependencies
-                sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
-                            //create a repo specific build image based on previous run
+                //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
+                def shCmd = "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                echo shCmd
+                sh shCmd
+                //create a repo specific build image based on previous run
                 sh "docker commit maven-build beedemo/${config.repo}-build"
                 sh "docker rm -f maven-build"
                 //sign in to registry
@@ -53,54 +73,36 @@ def call(body) {
                 stash name: "target-stash", includes: "target/*"
                 doBuild = false
             }
-        } catch (e) {
-            echo "buildImage needs to be built and pushed for ${config.repo}"
-            def workspaceDir = pwd()
-            checkout scm
-            //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
-            def shCmd = "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
-            echo shCmd
-            sh shCmd
-            //create a repo specific build image based on previous run
-            sh "docker commit maven-build beedemo/${config.repo}-build"
-            sh "docker rm -f maven-build"
-            //sign in to registry
-            //withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
-                //push repo specific image to Docker registry (DockerHub in this case)
-                //sh "docker push beedemo/${config.repo}-build"
-            //}
-            //stash an set skip build
-            stash name: "target-stash", includes: "target/*"
-            doBuild = false
         }
     }
-    stage 'build'
-    // now build, based on the configuration provided, 
-    //if not already built as part of creating or upgrading custom Docker build image
-    if(doBuild) {
-        node {
-            try {
-                checkout scm
-                sh('git rev-parse HEAD > GIT_COMMIT')
-                git_commit=readFile('GIT_COMMIT')
-                short_commit=git_commit.take(7)
-                //build with repo specific build image
-                docker.image("beedemo/${config.repo}-build").inside(){
-                    sh "mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+    stage('build') {
+        // now build, based on the configuration provided, 
+        //if not already built as part of creating or upgrading custom Docker build image
+        if(doBuild) {
+            node {
+                try {
+                    checkout scm
+                    sh('git rev-parse HEAD > GIT_COMMIT')
+                    git_commit=readFile('GIT_COMMIT')
+                    short_commit=git_commit.take(7)
+                    //build with repo specific build image
+                    docker.image("beedemo/${config.repo}-build").inside(){
+                        sh "mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                    }
+                    echo 'stashing target directory'
+                    stash name: "target-stash", includes: "target/*"
+                    currentBuild.result = "success"
+                } catch (e) {
+                    currentBuild.result = "failure"
                 }
-                echo 'stashing target directory'
-                stash name: "target-stash", includes: "target/*"
-                currentBuild.result = "success"
-            } catch (e) {
-                currentBuild.result = "failure"
             }
+        } else {
+            echo "already completed build in 'create/update build image' stage"
         }
-    } else {
-        echo "already completed build in 'create/update build image' stage"
     }
-    if(env.BRANCH_NAME.startsWith("master")){
+    if(env.BRANCH_NAME.startsWith("master")) {
         stage('Deploy to Prod') {
-            if(isDockerDeploy){
+            if(isDockerDeploy) {
                 node {
                     //first must stop any previous running image for ${config.repo}
                     try{
@@ -120,6 +122,7 @@ def call(body) {
                     //just going to run the image
                     deployImage.run("--name ${config.repo} -p ${config.port}:8080")
                 }
+            }
         }
     }
 }
