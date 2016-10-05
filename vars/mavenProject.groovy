@@ -31,7 +31,7 @@ def call(body) {
             def nodeContainerId = sh returnStdout: true, script: "cat /proc/1/cgroup | grep \'docker/\' | tail -1 | sed \'s/^.*\\///\' | cut -c 1-12"
             nodeContainerId = nodeContainerId.trim()
             try {
-                buildImage = docker.image("beedemo/${config.repo}-build").pull()
+                buildImage = docker.image("beedemo/${config.repo}-build")
                 echo "buildImage already built for ${config.repo}"
                 if(rebuildBuildImage){
                     echo "rebuild of buildImage ${config.repo}-build requested"
