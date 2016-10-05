@@ -89,7 +89,7 @@ def call(body) {
                     short_commit=git_commit.take(7)
                     //build with repo specific build image
                     docker.image("beedemo/${config.repo}-build").inside(){
-                        sh "mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                        sh "mvn -Dmaven.repo.local=/maven-repo -DGIT_COMMIT='${short_commit}' -DBUILD_NUMBER=${env.BUILD_NUMBER} -DBUILD_URL=${env.BUILD_URL} ${mvnBuildCmd}"
                     }
                     echo 'stashing target directory'
                     stash name: "target-stash", includes: "target/*"
