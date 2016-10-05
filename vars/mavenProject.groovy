@@ -29,6 +29,7 @@ def call(body) {
             def workspaceDir = pwd()
             //will use volumes-from for detected containerId
             def nodeContainerId = sh returnStdout: true, script: "cat /proc/1/cgroup | grep \'docker/\' | tail -1 | sed \'s/^.*\\///\' | cut -c 1-12"
+            nodeContainerId = nodeContainerId.trim()
             try {
                 buildImage = docker.image("beedemo/${config.repo}-build").pull()
                 echo "buildImage already built for ${config.repo}"
@@ -42,7 +43,7 @@ def call(body) {
                     git_commit=readFile('GIT_COMMIT')
                     short_commit=git_commit.take(7)
                     //refreshed image, useful if there are one or more new dependencies
-                    sh "docker run --name maven-build -w ${workspaceDir} --volumes-from 337861d4fb87 beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                    sh "docker run --name maven-build -w ${workspaceDir} --volumes-from ${nodeContainerId} beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
                                 //create a repo specific build image based on previous run
                     sh "docker commit maven-build beedemo/${config.repo}-build"
                     sh "docker rm -f maven-build"
@@ -59,7 +60,7 @@ def call(body) {
                 echo "buildImage needs to be built and pushed for ${config.repo}"
                 checkout scm
                 //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
-                def shCmd = "docker run --name maven-build -w ${workspaceDir} --volumes-from 337861d4fb87 kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                def shCmd = "docker run --name maven-build -w ${workspaceDir} --volumes-from ${nodeContainerId} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
                 echo shCmd
                 sh shCmd
                 //create a repo specific build image based on previous run
