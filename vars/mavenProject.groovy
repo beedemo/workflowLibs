@@ -22,10 +22,13 @@ def call(body) {
     def updateBuildImage = config.updateBuildImage ?: false
     //build Docker image from mvn package, default to false
     def isDockerDeploy = config.isDockerDeploy ?: false
+    //will use volumes-from for detected containerId
+    def nodeContainerId = sh returnStdout: true, script: "cat /proc/1/cgroup | grep \'docker/\' | tail -1 | sed \'s/^.*\\///\' | cut -c 1-12"
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
     stage('create/update build image') {
         node {
             def buildImage
+            def workspaceDir = pwd()
             try {
                 buildImage = docker.image("beedemo/${config.repo}-build").pull()
                 echo "buildImage already built for ${config.repo}"
@@ -34,13 +37,12 @@ def call(body) {
                     error "rebuild of buildImage ${config.repo}-build requested"
                 } else if(updateBuildImage) {
                     echo "buildImage to be updated and pushed for ${config.repo}"
-                    def workspaceDir = pwd()
                     checkout scm
                     sh('git rev-parse HEAD > GIT_COMMIT')
                     git_commit=readFile('GIT_COMMIT')
                     short_commit=git_commit.take(7)
                     //refreshed image, useful if there are one or more new dependencies
-                    sh "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                    sh "docker run --name maven-build  --volumes-from ${nodeContainerId} -w ${workspaceDir} beedemo/${config.repo}-build mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
                                 //create a repo specific build image based on previous run
                     sh "docker commit maven-build beedemo/${config.repo}-build"
                     sh "docker rm -f maven-build"
@@ -55,10 +57,9 @@ def call(body) {
                 }
             } catch (e) {
                 echo "buildImage needs to be built and pushed for ${config.repo}"
-                def workspaceDir = pwd()
                 checkout scm
                 //using specific maven repo directory '/maven-repo' to cache dependencies for later builds
-                def shCmd = "docker run --name maven-build -v ${workspaceDir}:${workspaceDir} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
+                def shCmd = "docker run --name maven-build --volumes-from ${nodeContainerId} -w ${workspaceDir} kmadel/maven:${mavenVersion}-jdk-${jdkVersion} mvn -Dmaven.repo.local=/maven-repo ${mvnBuildCmd}"
                 echo shCmd
                 sh shCmd
                 //create a repo specific build image based on previous run
