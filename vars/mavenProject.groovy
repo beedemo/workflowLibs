@@ -22,13 +22,13 @@ def call(body) {
     def updateBuildImage = config.updateBuildImage ?: false
     //build Docker image from mvn package, default to false
     def isDockerDeploy = config.isDockerDeploy ?: false
-    //will use volumes-from for detected containerId
-    def nodeContainerId = sh returnStdout: true, script: "cat /proc/1/cgroup | grep \'docker/\' | tail -1 | sed \'s/^.*\\///\' | cut -c 1-12"
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
     stage('create/update build image') {
         node {
             def buildImage
             def workspaceDir = pwd()
+            //will use volumes-from for detected containerId
+            def nodeContainerId = sh returnStdout: true, script: "cat /proc/1/cgroup | grep \'docker/\' | tail -1 | sed \'s/^.*\\///\' | cut -c 1-12"
             try {
                 buildImage = docker.image("beedemo/${config.repo}-build").pull()
                 echo "buildImage already built for ${config.repo}"
