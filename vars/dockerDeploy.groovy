@@ -1,19 +1,9 @@
 //simple docker deployment via Docker Pipeline plugin and `docker.image.run`
 
-@NonCPS
-def getDockerHost() {
-    return System.getenv().DOCKER_DEPLOY_PROD_HOST   
-}
-
-@NonCPS
-def getCertId() {
-    return System.getenv().DOCKER_DEPLOY_PROD_CERT_ID  
-}
-
 def call(org, name, innerPort, outerPort, imageTag) {
   node {
-    def dockerHost = getDockerHost()
-    def certId = getCertId()
+    def dockerHost = env.DOCKER_DEPLOY_PROD_HOST
+    def certId = env.DOCKER_DEPLOY_PROD_CERT_ID
     docker.withServer("$dockerHost", "$certId"){
       try {
         sh "docker stop $name"
