@@ -13,5 +13,7 @@ def call(org, name, innerPort, outerPort, imageTag) {
       //will pull specified image:tag and then run on $dockerHost
       docker.image("$org/$name:$imageTag").run("--name $name -p $innerPort:$outerPort")
     }
+    println("successfully deployed app: " + name)
+    deployAnalytics("$ES_HOST", "es-auth", "docker-prod", name, "$org/$name:$imageTag", "$DOCKER_DEPLOY_PROD_HOST", new Date().format("EEE, d MMM yyyy HH:mm:ss Z"), imageTag, "Success")
   }
 }
