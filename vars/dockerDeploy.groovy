@@ -1,7 +1,7 @@
 //simple docker deployment via Docker Pipeline plugin and `docker.image.run`
 
-def call(org, name, innerPort, outerPort, imageTag) {
-  node {
+def call(label, org, name, innerPort, outerPort, imageTag) {
+  node("$label") {
     //DOCKER_DEPLOY_PROD_HOST and DOCKER_DEPLOY_PROD_CERT_ID must be set as environment properties (master, folder or job level)
     docker.withServer("$DOCKER_DEPLOY_PROD_HOST", "$DOCKER_DEPLOY_PROD_CERT_ID"){
       try {
