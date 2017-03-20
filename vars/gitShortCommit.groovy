@@ -2,6 +2,5 @@
 def call(size) {
     size = size ?: 7
     git_commit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-    short_commit=git_commit.take(size)
-    env.SHORT_COMMIT = short_commit
+    env.SHORT_COMMIT = git_commit.take(size)
 }
