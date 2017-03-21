@@ -1,5 +1,7 @@
 //must be called from within a node block that supports Docker
-def call(org, name, pushCredId, mvnVersion, jdkVersion) {
+def call(org, name, pushCredId, mvn, jdk) {
+    def jdkVersion = jdk ?: 1.8
+    def mavenVersion = mvn ?: '3.3.9'
     try {
         sh "docker rm -f mvn-cache"
     } catch (e) {
