@@ -8,7 +8,7 @@ def call(org, name, pushCredId, mvn, jdk) {
         echo "nothing to clean up"
     }
     sh "apk --update add git"
-    sh "docker run --name mvn-cache -v ${WORKSPACE}:${WORKSPACE} -w ${WORKSPACE} maven:${mvnVersion}-jdk-${jdkVersion}-alpine mvn -Dmaven.repo.local=/usr/share/maven/ref clean package"
+    sh "docker run --name mvn-cache -v ${WORKSPACE}:${WORKSPACE} -w ${WORKSPACE} maven:${mavenVersion}-jdk-${jdkVersion}-alpine mvn -Dmaven.repo.local=/usr/share/maven/ref clean package"
     try {
         //create a repo specific build image based on previous run
         sh "docker commit mvn-cache ${org}/${name}"
