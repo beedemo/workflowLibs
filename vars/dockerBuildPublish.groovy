@@ -43,6 +43,23 @@ def call(body) {
                 dockerTag = env.DOCKER_TRIGGER_TAG
             }
         }
-
+    
+        //config.dockerHubCredentialsId is required
+        if(!config.dockerHubCredentialsId) {
+            error 'dockerHubCredentialsId is required'
+        }
+      stage 'Build Docker Image'
+        dockerImage = docker.build("${dockerUserOrg}/${dockerRepoName}:${dockerTag}", dockerBuildArgs)
+        if(env.BRANCH_NAME=="master" || pushBranch) {
+          stage 'Publish Docker Image'
+              withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
+                dockerImage.push()
+                if(tagAsLatest) {
+                  dockerImage.push("latest")
+                }
+              }
+        } else {
+            echo "Skipped push for non-master branch"
+        }
     }
 }
