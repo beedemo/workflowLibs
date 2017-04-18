@@ -18,7 +18,7 @@ def call(body) {
         repo = tokens[tokens.size()-2]
         tag = tokens[tokens.size()-1]
     
-        def d = [org: org, repo: repo, tag: tag, passTag: false, useTriggerTag: false, pushNonMaster: false]
+        def d = [org: org, repo: repo, tag: tag, passTag: false, useTriggerTag: false, pushBranch: false]
         def props = readProperties defaults: d, file: 'dockerBuildPublish.properties'
     
         def tagAsLatest = config.tagAsLatest ?: true
@@ -28,8 +28,8 @@ def call(body) {
         def dockerHubTriggerImage = props['dockerHubTriggerImage']
         def dockerBuildArgs = ' .'
         def tagArg = ''
-        def pushNonMaster = props['pushNonMaster']
-        echo "push non master branch: $pushNonMaster"
+        def pushBranch = props['pushBranch']
+        echo "push non master branch: $pushBranch"
         if(dockerHubTriggerImage) {
             properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: [dockerHubTriggerImage] as Set]]]]), 
                 [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]])
@@ -50,7 +50,7 @@ def call(body) {
         }
       stage 'Build Docker Image'
         dockerImage = docker.build("${dockerUserOrg}/${dockerRepoName}:${dockerTag}", dockerBuildArgs)
-        if(env.BRANCH_NAME=="master" || pushNonMaster) {
+        if(env.BRANCH_NAME=="master" || pushBranch) {
           stage 'Publish Docker Image'
               withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
                 dockerImage.push()
