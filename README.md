@@ -5,10 +5,10 @@ For more information on setting up and using Pipeline Global Libraries please se
 
 It is good practice to maintain your Pipeline Global Libraries in an external SCM, in addition to pushing to the Jenkins hosted workflowLibs Pipeline Global Library Git repoisitory. This also helps to manage sharing a Pipeline Global Library across multipe masters. Also, you could use a script such at [this one](https://github.com/cloudbees/jenkins-scripts/blob/master/pipeline-global-lib-init.groovy) to pull in externally managed Pipeline Global Libraries to the embedded Pipeline Global Library Git repository.
 
-##Global Steps
-####mavenProject
+## Global Steps
+#### mavenProject
 Provides a template for maven builds. Additionally, it provides automated creation/updates of customized build images using `docker commit` to include caching all maven dependencies inside of the repo specific custom build image; dramatically speeding up build times.
-######configuration:
+###### configuration:
 - `mavenProject`: provides simple config as Pipeline for maven based projects
   - org: GitHub organization or user repo is under
   - repo: GitHub repository being built
@@ -18,7 +18,7 @@ Provides a template for maven builds. Additionally, it provides automated creati
   - rebuildBuildImage: boolean that controls whether or not to refresh existing repo specific Docker build image based on the `maven' image
   - protectedBranches: allows to specify name(s) of branch(es) to protected and use Jenkins to control status, uses the `githubProtrectBranch` step documented below
 
-######*Example:*
+###### *Example:*
 ```groovy
 	mavenProject {
 		org = 'sa-team'
@@ -30,9 +30,9 @@ Provides a template for maven builds. Additionally, it provides automated creati
 		protectedBranches = ['master']
 	}
 ```
-####githubProtectBranch
+#### githubProtectBranch
 Uses the GitHub API to set up protected branches on repository being built.
-######configuration:
+###### configuration:
 - `githubProtectBranch`: sets protection status of rep branch(es)
   - branches: list of strings specifying branches to set protected status on
   - API URL: GitHub API URL to use
@@ -40,7 +40,7 @@ Uses the GitHub API to set up protected branches on repository being built.
   - org: org/user of repo - for example sa-demo in `sa-demo/todo-api`
   - repo: name of repo of branch
 
-######*Example:*
+###### *Example:*
 ```groovy
 githubProtectBranch(['master','feature-one'],
   'https://github.enterprise.com/api/v3',
