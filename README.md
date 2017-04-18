@@ -1,5 +1,5 @@
-# workflowLibs
-Pipeline Global Library for SA Jenkins demo environments. 
+# Beedemo Pipeline Shared Library
+Pipeline Shared Library for SA Jenkins demo environments. 
 
 For more information on setting up and using Pipeline Global Libraries please see the documentation on GitHub: https://github.com/jenkinsci/workflow-cps-global-lib-plugin.
 
