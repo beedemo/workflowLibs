@@ -29,6 +29,7 @@ def call(body) {
         def dockerBuildArgs = ' .'
         def tagArg = ''
         def pushNonMaster = props['pushNonMaster']
+        echo "push non master branch: $pushNonMaster"
         if(dockerHubTriggerImage) {
             properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: [dockerHubTriggerImage] as Set]]]]), 
                 [$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5']]])
