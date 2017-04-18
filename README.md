@@ -18,7 +18,7 @@ Provides a template for maven builds. Additionally, it provides automated creati
   - rebuildBuildImage: boolean that controls whether or not to refresh existing repo specific Docker build image based on the `maven' image
   - protectedBranches: allows to specify name(s) of branch(es) to protected and use Jenkins to control status, uses the `githubProtrectBranch` step documented below
 
-######*Example:*
+###### Example:
 ```groovy
 	mavenProject {
 		org = 'sa-team'
