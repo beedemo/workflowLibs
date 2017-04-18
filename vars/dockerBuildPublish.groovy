@@ -58,6 +58,8 @@ def call(body) {
                   dockerImage.push("latest")
                 }
               }
+        } else {
+            echo "Skipped push for non-master branch"
         }
     }
 }
