@@ -7,7 +7,7 @@ def call(body) {
     body()
 
     def dockerImage
-    node('docker-cloud') {
+    node('docker') {
       stage 'Configure Properties'
         //need to check for properties file from SCM
         checkout scm
@@ -18,10 +18,11 @@ def call(body) {
         repo = tokens[tokens.size()-2]
         tag = tokens[tokens.size()-1]
     
-        def d = [org: org, repo: repo, tag: tag, passTag: false, useTriggerTag: false, pushBranch: false]
+        def d = [org: org, repo: repo, tag: tag, passTag: false, useTriggerTag: false, pushBranch: false, dockerHubCredentialsId: config.dockerHubCredentialsId]
         def props = readProperties defaults: d, file: 'dockerBuildPublish.properties'
     
         def tagAsLatest = config.tagAsLatest ?: true
+        def dockerHubCredentialsId = props['dockerHubCredentialsId']
         def dockerUserOrg = props['org']
         def dockerRepoName = props['repo']
         def dockerTag = props['tag']
@@ -45,14 +46,14 @@ def call(body) {
         }
     
         //config.dockerHubCredentialsId is required
-        if(!config.dockerHubCredentialsId) {
+        if(!dockerHubCredentialsId) {
             error 'dockerHubCredentialsId is required'
         }
       stage 'Build Docker Image'
         dockerImage = docker.build("${dockerUserOrg}/${dockerRepoName}:${dockerTag}", dockerBuildArgs)
         if(env.BRANCH_NAME=="master" || pushBranch) {
           stage 'Publish Docker Image'
-              withDockerRegistry(registry: [credentialsId: "${config.dockerHubCredentialsId}"]) {
+              withDockerRegistry(registry: [credentialsId: "${dockerHubCredentialsId}"]) {
                 dockerImage.push()
                 if(tagAsLatest) {
                   dockerImage.push("latest")
