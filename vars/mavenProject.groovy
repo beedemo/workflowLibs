@@ -107,9 +107,15 @@ def call(body) {
     } else {
         echo "already completed build in 'create/update build image' stage"
     }
-    if(env.BRANCH_NAME=="master"){
+    if(env.BRANCH_NAME==config.deployBranch){
         stage name: 'Deploy to Prod', concurrency: 1
-        echo "steps for deployment..."
-        deployAnalytics("http://elasticsearch.jenkins.beedemo.net", "es-auth", "Tomcat 8", "${config.repo}", "${config.repo}.war", "NA",  new Date().format("EEE, d MMM yyyy HH:mm:ss Z"), short_commit, "Success")
+        if(config.deployType=='websphereLibertyContainer') {
+            //build and push deployment image
+            node('docker-cloud') {
+                unstash "target-stash"
+                dockerBuildPush("beedemo", config.repo, "${BUILD_NUMBER}", "target", "docker-hub-beedemo")
+                dockerDeploy("docker-cloud","beedemo", config.repo, 8081, 8081, "${BUILD_NUMBER}")
+            }
+        }
     }
 }
