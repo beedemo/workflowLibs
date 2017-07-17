@@ -114,7 +114,7 @@ def call(body) {
             node('docker-cloud') {
                 unstash "target-stash"
                 dockerBuildPush("beedemo", config.repo, "${BUILD_NUMBER}", "target", "docker-hub-beedemo")
-                dockerDeploy("docker-cloud","beedemo", config.repo, 8081, 8081, "${BUILD_NUMBER}")
+                dockerDeploy("docker-cloud","beedemo", config.repo, 9080, 9080, "${BUILD_NUMBER}")
             }
         }
     }
