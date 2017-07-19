@@ -5,6 +5,8 @@ For more information on setting up and using Pipeline Global Libraries please se
 
 It is good practice to maintain your Pipeline Global Libraries in an external SCM, in addition to pushing to the Jenkins hosted workflowLibs Pipeline Global Library Git repoisitory. This also helps to manage sharing a Pipeline Global Library across multipe masters. Also, you could use a script such at [this one](https://github.com/cloudbees/jenkins-scripts/blob/master/pipeline-global-lib-init.groovy) to pull in externally managed Pipeline Global Libraries to the embedded Pipeline Global Library Git repository.
 
+Pipline Global Libraries may be configured at the master, folder or job level.
+
 ## Global Steps
 #### mavenProject
 Provides a template for maven builds. Additionally, it provides automated creation/updates of customized build images using `docker commit` to include caching all maven dependencies inside of the repo specific custom build image; dramatically speeding up build times.
