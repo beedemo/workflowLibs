@@ -21,12 +21,12 @@ def call(body) {
     //will use docker commit and push to update custom build image
     def updateBuildImage = config.updateBuildImage ?: false
     properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5']]])
+    def githubCredentialsId = 'beedemo-user-github-token'
     stage 'update protected branches'
     if(config.protectedBranches!=null && !config.protectedBranches.empty){
         //set up GitHub protected branches for specified branches
         def apiUrl = 'https://github.beescloud.com/api/v3'
-        def credentialsId = 'beedemo-user-github-token'
-        githubProtectBranch(config.protectedBranches, apiUrl, credentialsId, config.org, config.repo)
+        githubProtectBranch(config.protectedBranches, apiUrl, githubCredentialsId, config.org, config.repo)
     } else {
         echo 'no branches set to protect'
     }
@@ -87,7 +87,7 @@ def call(body) {
     if(doBuild) {
         node('docker-cloud') {
             //get github repo team to use as hipchat room
-            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: githubCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                 def hipchatRoom = sh(returnStdout: true, script: "curl -s -u ${env.USERNAME}:${env.PASSWORD} 'https://api.github.com/repos/beedemo/${config.repo}/teams' | jq -r '.[0] | .name' | tr -d '\n'")
             }
             try {
