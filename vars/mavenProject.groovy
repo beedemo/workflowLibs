@@ -86,6 +86,10 @@ def call(body) {
     //if not already built as part of creating or upgrading custom Docker build image
     if(doBuild) {
         node('docker-cloud') {
+            //get github repo team to use as hipchat room
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: credentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                def hipchatRoom = sh(returnStdout: true, script: "curl -s -u ${env.USERNAME}:${env.PASSWORD} 'https://api.github.com/repos/beedemo/${config.repo}/teams' | jq -r '.[0] | .name' | tr -d '\n'")
+            }
             try {
                 checkout scm
                 sh('git rev-parse HEAD > GIT_COMMIT')
@@ -101,7 +105,7 @@ def call(body) {
                 hipchatSend color: 'GREEN', textFormat: true, message: "(super) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
             } catch (e) {
                 currentBuild.result = "failure"
-                hipchatSend color: 'RED', textFormat: true, message: "(angry) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: config.hipChatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
+                hipchatSend color: 'RED', textFormat: true, message: "(angry) Pipeline for ${config.org}/${config.repo} complete - Job Name: ${env.JOB_NAME} Build Number: ${env.BUILD_NUMBER} status: ${currentBuild.result} ${env.BUILD_URL}", room: hipchatRoom, server: 'cloudbees.hipchat.com', token: 'A6YX8LxNc4wuNiWUn6qHacfO1bBSGXQ6E1lELi1z', v2enabled: true
             }
         }
     } else {
