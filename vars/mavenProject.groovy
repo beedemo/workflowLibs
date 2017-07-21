@@ -93,7 +93,7 @@ def call(body) {
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: githubCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
                 hipchatRoom = sh(returnStdout: true, script: "curl -s -u ${env.USERNAME}:${env.PASSWORD} 'https://api.github.com/repos/beedemo/${config.repo}/teams' | jq -r '.[0] | .name' | tr -d '\n'")
             }
-            echo 'hipchat room from GitHub team: ${hipchatRoom}'
+            echo "hipchat room from GitHub team: ${hipchatRoom}"
             try {
                 checkout scm
                 sh('git rev-parse HEAD > GIT_COMMIT')
