@@ -7,6 +7,9 @@ def call(body) {
     body()
     //used for analytics indexing
     def short_commit
+    
+    //github team specific hipchat room
+    def hipchatRoom
     //don't need to build again if done as part of creating or updating custom Docker build image
     def doBuild = true
     //default to 'clean install'
@@ -88,8 +91,9 @@ def call(body) {
         node('docker-cloud') {
             //get github repo team to use as hipchat room
             withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: githubCredentialsId, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-                def hipchatRoom = sh(returnStdout: true, script: "curl -s -u ${env.USERNAME}:${env.PASSWORD} 'https://api.github.com/repos/beedemo/${config.repo}/teams' | jq -r '.[0] | .name' | tr -d '\n'")
+                hipchatRoom = sh(returnStdout: true, script: "curl -s -u ${env.USERNAME}:${env.PASSWORD} 'https://api.github.com/repos/beedemo/${config.repo}/teams' | jq -r '.[0] | .name' | tr -d '\n'")
             }
+            echo 'hipchat room from GitHub team: ${hipchatRoom}'
             try {
                 checkout scm
                 sh('git rev-parse HEAD > GIT_COMMIT')
