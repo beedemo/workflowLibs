@@ -7,6 +7,12 @@ def call(body) {
     body()
 
     def dockerImage
+    def tagAsLatest
+    def dockerHubCredentialsId
+    def dockerUserOrg
+    def dockerRepoName
+    def dockerTag
+    def dockerBuildArgs
     node('docker') {
       timestamps {
         stage('Configure Properties') {
@@ -22,13 +28,14 @@ def call(body) {
           def d = [org: org, repo: repo, tag: tag, passTag: false, useTriggerTag: false, pushBranch: false, dockerHubCredentialsId: config.dockerHubCredentialsId]
           def props = readProperties defaults: d, file: 'dockerBuildPublish.properties'
     
-          def tagAsLatest = config.tagAsLatest ?: true
-          def dockerHubCredentialsId = props['dockerHubCredentialsId']
-          def dockerUserOrg = props['org']
-          def dockerRepoName = props['repo']
-          def dockerTag = props['tag']
+          tagAsLatest = config.tagAsLatest ?: true
+          dockerHubCredentialsId = props['dockerHubCredentialsId']
+          dockerUserOrg = props['org']
+          dockerRepoName = props['repo']
+          dockerTag = props['tag']
+          dockerBuildArgs = ' .'
+          
           def dockerHubTriggerImage = props['dockerHubTriggerImage']
-          def dockerBuildArgs = ' .'
           def tagArg = ''
           def pushBranch = props['pushBranch']
           echo "push non master branch: $pushBranch"
