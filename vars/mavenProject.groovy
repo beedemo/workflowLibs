@@ -25,7 +25,7 @@ def call(body) {
     if(config.protectedBranches!=null && !config.protectedBranches.empty){
         //set up GitHub protected branches for specified branches
         def apiUrl = 'https://github.beescloud.com/api/v3'
-        def credentialsId = '3ebff2f8-1013-42ff-a1e4-6d74e99f4ca1'
+        def credentialsId = 'beedemo-user-github-token'
         githubProtectBranch(config.protectedBranches, apiUrl, credentialsId, config.org, config.repo)
     } else {
         echo 'no branches set to protect'
