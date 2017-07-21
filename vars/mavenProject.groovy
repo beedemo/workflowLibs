@@ -52,7 +52,7 @@ def call(body) {
                 sh "docker commit maven-build beedemo/${config.repo}-build"
                 sh "docker rm -f maven-build"
                 //sign in to registry
-                withDockerRegistry(registry: [credentialsId: 'docker-registry-login']) { 
+                withDockerRegistry(registry: [credentialsId: 'docker-hub-beedemo']) { 
                     //push repo specific image to Docker registry (DockerHub in this case)
                     sh "docker push beedemo/${config.repo}-build"
                 }
