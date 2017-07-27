@@ -13,6 +13,7 @@ def call(body) {
     def dockerRepoName
     def dockerTag
     def dockerBuildArgs
+    def pushBranch
     node('docker') {
       timestamps {
         stage('Configure Properties') {
@@ -37,7 +38,7 @@ def call(body) {
           
           def dockerHubTriggerImage = props['dockerHubTriggerImage']
           def tagArg = ''
-          def pushBranch = props['pushBranch']
+          pushBranch = props['pushBranch']
           echo "push non master branch: $pushBranch"
           if(dockerHubTriggerImage) {
               properties([pipelineTriggers(triggers: [[$class: 'DockerHubTrigger', options: [[$class: 'TriggerOnSpecifiedImageNames', repoNames: [dockerHubTriggerImage] as Set]]]]), 
