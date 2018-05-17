@@ -14,7 +14,7 @@ def call(body) {
     def dockerTag
     def dockerBuildArgs
     def pushBranch
-    node('dind') {
+    node('docker') {
       timestamps {
         stage('Configure Properties') {
           //need to check for properties file from SCM
